@@ -10,12 +10,12 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Configure multer for file uploads
+
 const upload = multer({
   dest: 'uploads/',
   fileFilter: (req, file, cb) => {
@@ -31,12 +31,12 @@ const upload = multer({
   }
 });
 
-// Serve the main HTML file
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Analyze resume endpoint
+
 app.post('/analyze', upload.single('resume'), async (req, res) => {
   try {
     if (!req.file) {
@@ -49,25 +49,25 @@ app.post('/analyze', upload.single('resume'), async (req, res) => {
 
     let resumeText = '';
 
-    // Parse the uploaded file based on type
+   
     if (req.file.mimetype === 'application/pdf') {
-      // Parse PDF file
+      
       const dataBuffer = fs.readFileSync(req.file.path);
       const pdfData = await pdfParse(dataBuffer);
       resumeText = pdfData.text;
     } else if (req.file.mimetype === 'text/plain') {
-      // Read TXT file
+     
       resumeText = fs.readFileSync(req.file.path, 'utf8');
     }
 
-    // Clean up uploaded file
+    
     fs.unlinkSync(req.file.path);
 
     if (!resumeText.trim()) {
       return res.status(400).json({ error: 'Could not extract text from the resume' });
     }
 
-    // Send to Groq API with enhanced prompt for better formatting
+    
     const groqResponse = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
@@ -77,20 +77,20 @@ app.post('/analyze', upload.single('resume'), async (req, res) => {
             role: 'user',
             content: `Please analyze this resume and provide feedback in the following EXACT format with emojis and proper sections:
 
-🔥 **RESUME ROAST SUMMARY**
+🔥 RESUME ROAST SUMMARY
 [Write a witty, sarcastic but constructive 2-3 sentence summary of the overall resume]
 
-📝 **WHAT NEEDS FIXING** 
+📝 WHAT NEEDS FIXING 
 1. [First major improvement with specific actionable advice]
 2. [Second major improvement with specific actionable advice] 
 3. [Third major improvement with specific actionable advice]
 
-💼 **JOBS YOU MIGHT (BARELY) QUALIFY FOR**
+💼 JOBS YOU MIGHT (BARELY) QUALIFY FOR
 • [First job role with a humorous but realistic comment]
 • [Second job role with a humorous but realistic comment]
 • [Third job role with a humorous but realistic comment]
 
-⭐ **THE BRIGHT SIDE**
+⭐ THE BRIGHT SIDE
 [End with 1-2 positive things about the resume to keep it constructive]
 
 Resume to analyze:
@@ -113,7 +113,7 @@ ${resumeText}`
   } catch (error) {
     console.error('Error analyzing resume:', error);
     
-    // Clean up file if it exists
+   
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
@@ -128,7 +128,7 @@ ${resumeText}`
   }
 });
 
-// Error handling middleware
+
 app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {

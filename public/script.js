@@ -18,18 +18,11 @@ class RoastMyResume {
     }
 
     setupEventListeners() {
-        // File input change
         this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
-
-        // Drag and drop
         this.uploadSection.addEventListener('dragover', (e) => this.handleDragOver(e));
         this.uploadSection.addEventListener('dragleave', (e) => this.handleDragLeave(e));
         this.uploadSection.addEventListener('drop', (e) => this.handleDrop(e));
-
-        // Roast button
         this.roastButton.addEventListener('click', () => this.analyzeResume());
-
-        // Reset button
         this.resetButton.addEventListener('click', () => this.resetForm());
     }
 
@@ -53,7 +46,6 @@ class RoastMyResume {
     handleDrop(event) {
         event.preventDefault();
         this.uploadSection.classList.remove('dragover');
-        
         const files = event.dataTransfer.files;
         if (files.length > 0) {
             const file = files[0];
@@ -66,18 +58,15 @@ class RoastMyResume {
 
     validateFile(file) {
         const allowedTypes = ['application/pdf', 'text/plain'];
-        const maxSize = 5 * 1024 * 1024; // 5MB
-
+        const maxSize = 5 * 1024 * 1024;
         if (!allowedTypes.includes(file.type)) {
             this.showError('Please select a PDF or TXT file.');
             return false;
         }
-
         if (file.size > maxSize) {
             this.showError('File size must be less than 5MB.');
             return false;
         }
-
         return true;
     }
 
@@ -85,7 +74,6 @@ class RoastMyResume {
         if (!this.validateFile(file)) {
             return;
         }
-
         this.selectedFile = file;
         this.selectedFileDiv.textContent = `Selected: ${file.name} (${this.formatFileSize(file.size)})`;
         this.selectedFileDiv.style.display = 'block';
@@ -106,28 +94,21 @@ class RoastMyResume {
             this.showError('Please select a file first.');
             return;
         }
-
         this.showLoading();
         this.hideError();
         this.roastButton.disabled = true;
-
         const formData = new FormData();
         formData.append('resume', this.selectedFile);
-
         try {
             const response = await fetch('/analyze', {
                 method: 'POST',
                 body: formData
             });
-
             const data = await response.json();
-
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to analyze resume');
             }
-
             this.showResult(data.roast);
-
         } catch (error) {
             console.error('Error analyzing resume:', error);
             this.showError(error.message || 'An error occurred while analyzing your resume. Please try again.');
@@ -169,13 +150,10 @@ class RoastMyResume {
         this.result.classList.remove('show');
         this.hideError();
         this.hideLoading();
-        
-        // Scroll back to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
 
-// Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new RoastMyResume();
 });
